@@ -18,5 +18,8 @@ public class DepartmentService {
 		if (obj.getId() == null) {
 			dao.insert(obj);
 		}
+		else {
+			dao.update(obj);
+		}
 	}
 }
