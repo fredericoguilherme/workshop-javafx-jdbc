@@ -1,9 +1,11 @@
 package gui;
 
 import java.net.URL;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -126,7 +128,7 @@ public class SellerFormController implements Initializable {
 	private Seller getFormData() {
 		Seller obj = new Seller();
 
-		ValidationException exception = new ValidationException("Erro Validação");
+		ValidationException exception = new ValidationException("Erro na Validação");
 
 		obj.setId(Utils.tryParseToInt(txtId.getText()));
 
@@ -134,6 +136,27 @@ public class SellerFormController implements Initializable {
 			exception.adderro("name", "O campo não pode ser vazio");
 		}
 		obj.setName(txtName.getText());
+
+		if (txtEmail.getText() == null || txtEmail.getText().trim().equals("")) {
+			exception.adderro("email", "O campo não pode ser vazio");
+		}
+		obj.setEmail(txtEmail.getText());
+
+		if (dpBirthDate.getValue() != null) {
+			Instant instant = Instant.from(dpBirthDate.getValue().atStartOfDay(ZoneId.systemDefault()));
+			obj.setBirthDate(Date.from(instant));
+		}
+		else {
+			exception.adderro("birthDate", "O campo não pode ser vazio");
+		}
+
+		if (txtBaseSalary.getText() == null || txtBaseSalary.getText().trim().equals("")) {
+			exception.adderro("baseSalary", "O campo não pode ser vazio");
+		}
+
+		obj.setBaseSalary(Utils.tryParseToDouble(txtBaseSalary.getText()));
+		
+		obj.setDepartment(comboBoxDepartment.getValue());
 
 		if (exception.getErrors().size() > 0) {
 			throw exception;
@@ -188,15 +211,28 @@ public class SellerFormController implements Initializable {
 		obsList = FXCollections.observableArrayList(list);
 		comboBoxDepartment.setItems(obsList);
 	}
-
+	
+	/**
+	 * 
+	 * @param errors
+	 */
 	private void setErrorMessages(Map<String, String> errors) {
 		Set<String> fields = errors.keySet();
+//
+//		if (fields.contains("name")) {
+//			labelErrorName.setText(errors.get("name"));
+//		}
 
-		if (fields.contains("name")) {
-			labelErrorName.setText(errors.get("name"));
-		}
+		labelErrorName.setText(fields.contains("name") ? errors.get("name") : "");
+		labelErrorEmail.setText(fields.contains("email") ? errors.get("email") : "");
+		labelErrorBirthDate.setText(fields.contains("birthDate") ? errors.get("birthDate") : "");
+		labelErrorBaseSalary.setText(fields.contains("baseSalary") ? errors.get("baseSalary") : "");
+
 	}
-
+	
+	/**
+	 * 
+	 */
 	private void initializeComboBoxDepartment() {
 		Callback<ListView<Department>, ListCell<Department>> factory = lv -> new ListCell<Department>() {
 			@Override
